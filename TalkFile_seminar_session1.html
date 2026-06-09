@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude 세미나 · Session 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0d0b08;
+  --surface: #171410;
+  --s2:      #211d18;
+  --s3:      #2c2720;
+  --text:    #f0e6d0;
+  --t2:      #a0927a;
+  --t3:      #564d40;
+  --line:    #2e2820;
+
+  --red:  #c4573a;
+  --teal: #3a9e88;
+  --gold: #e0a03a;
+  --blue: #4a8fd4;
+
+  --sans: 'IBM Plex Sans KR', sans-serif;
+  --serif:'Fraunces', serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
+
+/* ── PROGRESS ── */
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--red);transition:width .4s ease;z-index:100}
+
+/* ── NAV ── */
+#nav{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:20px;z-index:100;
+  background:rgba(13,11,8,.8);border:1px solid var(--line);
+  backdrop-filter:blur(12px);border-radius:100px;padding:10px 22px;
+}
+#nav button{
+  background:none;border:none;color:var(--t2);cursor:pointer;
+  font-size:1.1rem;padding:4px 8px;border-radius:6px;transition:all .2s;
+}
+#nav button:hover{color:var(--text);background:var(--s2)}
+#nav button:disabled{opacity:.2;cursor:default}
+#counter{font-family:var(--mono);font-size:.75rem;color:var(--t3);min-width:50px;text-align:center}
+
+/* ── SECTION INDICATOR ── */
+#sec-label{
+  position:fixed;top:18px;right:24px;
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--t3);z-index:100;
+}
+
+/* ── SLIDE BASE ── */
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  padding:6vh 8vw;
+  opacity:0;pointer-events:none;
+  transition:opacity .4s ease, transform .4s ease;
+  transform:translateX(40px);
+  overflow:hidden;
+}
+.slide.active{opacity:1;pointer-events:auto;transform:translateX(0)}
+.slide.exit{opacity:0;transform:translateX(-40px)}
+
+/* ── SLIDE VARIANTS ── */
+.slide.title-slide{
+  align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse 70% 60% at 30% 40%, rgba(196,87,58,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 70% at 80% 70%, rgba(58,158,136,.07) 0%, transparent 60%);
+}
+.slide.section-slide{
+  align-items:center;text-align:center;
+  justify-content:center;
+}
+.slide.section-slide.red   { background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(196,87,58,.18) 0%,transparent 70%);}
+.slide.section-slide.teal  { background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(58,158,136,.16) 0%,transparent 70%);}
+.slide.section-slide.gold  { background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(224,160,58,.14) 0%,transparent 70%);}
+.slide.section-slide.blue  { background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(74,143,212,.14) 0%,transparent 70%);}
+.slide.section-slide.green { background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(100,180,100,.14) 0%,transparent 70%);}
+
+/* ── TYPOGRAPHY ── */
+.eyebrow{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--red);margin-bottom:16px;
+}
+.eyebrow.teal{color:var(--teal)}
+.eyebrow.gold{color:var(--gold)}
+.eyebrow.blue{color:var(--blue)}
+.eyebrow.green{color:#64b464}
+
+.slide-title{
+  font-family:var(--sans);font-weight:700;
+  font-size:clamp(1.8rem,3.5vw,3rem);
+  line-height:1.15;letter-spacing:-.02em;
+  color:var(--text);margin-bottom:10px;
+}
+.slide-title em{font-style:normal;color:var(--red)}
+.slide-title em.teal{color:var(--teal)}
+.slide-title em.gold{color:var(--gold)}
+
+.section-num{
+  font-family:var(--serif);font-style:italic;font-weight:300;
+  font-size:clamp(4rem,10vw,9rem);color:var(--t3);
+  line-height:1;margin-bottom:12px;
+}
+.section-title{
+  font-family:var(--sans);font-weight:700;
+  font-size:clamp(1.8rem,4vw,3.2rem);letter-spacing:-.025em;
+}
+.section-sub{
+  font-family:var(--serif);font-style:italic;font-weight:300;
+  font-size:1.1rem;color:var(--t2);margin-top:10px;
+}
+.section-time{
+  font-family:var(--mono);font-size:.8rem;
+  color:var(--t3);margin-top:20px;letter-spacing:.06em;
+}
+
+/* ── MAIN TITLE ── */
+.main-title{
+  font-family:var(--sans);font-weight:700;
+  font-size:clamp(2.5rem,5vw,4.5rem);
+  line-height:1.1;letter-spacing:-.03em;
+  margin-bottom:18px;
+}
+.main-title em{font-style:normal;color:var(--red)}
+.main-sub{
+  font-family:var(--serif);font-style:italic;font-weight:300;
+  font-size:clamp(1rem,2vw,1.4rem);color:var(--t2);
+  margin-bottom:40px;
+}
+.meta-tags{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.tag{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;
+  padding:6px 14px;border-radius:100px;border:1px solid var(--line);
+  color:var(--t2);background:var(--surface);
+}
+
+/* ── CONTENT AREAS ── */
+.content{width:100%;max-width:860px}
+
+.subtitle{
+  font-size:1rem;color:var(--t2);margin-bottom:32px;
+  font-weight:300;line-height:1.6;max-width:600px;
+}
+
+.items{list-style:none;display:flex;flex-direction:column;gap:12px;width:100%}
+.items li{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:14px 20px;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px;
+  font-size:.95rem;line-height:1.6;color:var(--t2);
+}
+.items li .bullet{
+  flex-shrink:0;width:28px;height:28px;border-radius:8px;
+  background:var(--red);display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.7rem;font-weight:600;color:#fff;margin-top:1px;
+}
+.items li .bullet.teal{background:var(--teal)}
+.items li .bullet.gold{background:var(--gold);color:var(--bg)}
+.items li b{color:var(--text);font-weight:600}
+
+/* ── 2-COL GRID ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%}
+
+.card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:20px 22px;
+}
+.card.accent-top{border-top:3px solid var(--red)}
+.card.accent-top.teal{border-top-color:var(--teal)}
+.card.accent-top.gold{border-top-color:var(--gold)}
+.card.accent-top.blue{border-top-color:var(--blue)}
+.card .clabel{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--red);margin-bottom:8px;
+}
+.card .clabel.teal{color:var(--teal)}
+.card .clabel.gold{color:var(--gold)}
+.card .clabel.blue{color:var(--blue)}
+.card h4{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.card p{font-size:.85rem;color:var(--t2);line-height:1.65}
+
+/* ── CALLOUT ── */
+.callout{
+  padding:16px 22px;border-radius:0 12px 12px 0;
+  border-left:4px solid var(--red);background:rgba(196,87,58,.08);
+  font-size:.95rem;color:var(--t2);line-height:1.7;
+  margin-bottom:14px;width:100%;
+}
+.callout.teal{border-left-color:var(--teal);background:rgba(58,158,136,.08)}
+.callout.gold{border-left-color:var(--gold);background:rgba(224,160,58,.08)}
+.callout b{color:var(--text);font-weight:600}
+
+/* ── CODE ── */
+pre{
+  background:var(--s2);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;font-family:var(--mono);font-size:.8rem;
+  line-height:1.75;color:#d4cfc8;overflow-x:auto;width:100%;
+  margin:10px 0;
+}
+code.inline{
+  font-family:var(--mono);font-size:.82em;
+  background:var(--s2);border:1px solid var(--line);
+  border-radius:5px;padding:2px 7px;color:var(--teal);
+}
+pre .cm{color:#5a5048}
+pre .kw{color:#7abfb0}
+pre .st{color:#a8c87a}
+pre .hl{color:var(--gold)}
+
+/* ── PROMPT CARD ── */
+.prompt-card{
+  border-radius:12px;padding:16px 18px;margin-bottom:10px;
+  width:100%;
+}
+.prompt-card.mkt{background:rgba(196,87,58,.1);border:1.5px solid rgba(196,87,58,.3)}
+.prompt-card.brand{background:rgba(120,80,180,.1);border:1.5px solid rgba(120,80,180,.3)}
+.prompt-card.dev{background:rgba(74,143,212,.1);border:1.5px solid rgba(74,143,212,.3)}
+
+.prompt-card .plabel{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:8px;font-weight:600;
+}
+.prompt-card.mkt .plabel{color:var(--red)}
+.prompt-card.brand .plabel{color:#a07ae0}
+.prompt-card.dev .plabel{color:var(--blue)}
+.prompt-card .ptext{
+  font-family:var(--mono);font-size:.78rem;line-height:1.7;
+  color:var(--t2);white-space:pre-wrap;
+}
+.prompt-card .ph{color:var(--text);font-weight:600}
+
+/* ── COMPARISON TABLE ── */
+.ctable{width:100%;border-collapse:collapse;font-size:.85rem}
+.ctable th{
+  background:var(--s2);color:var(--t2);font-weight:600;
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:10px 14px;border:1px solid var(--line);
+  text-align:left;
+}
+.ctable td{
+  padding:9px 14px;border:1px solid var(--line);
+  color:var(--t2);vertical-align:top;
+}
+.ctable tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.ctable .yes{color:#6bc87a;font-weight:700}
+.ctable .no{color:#c86464;font-weight:700}
+.ctable .hl{color:var(--text);font-weight:600}
+
+/* ── AGENDA ITEM ── */
+.agenda{display:flex;flex-direction:column;gap:8px;width:100%}
+.agenda-item{
+  display:flex;align-items:center;gap:16px;
+  padding:12px 18px;background:var(--surface);
+  border:1px solid var(--line);border-radius:10px;
+}
+.agenda-item .anum{
+  font-family:var(--serif);font-style:italic;font-size:1.4rem;
+  color:var(--t3);min-width:24px;
+}
+.agenda-item .atxt{flex:1;font-size:.92rem;color:var(--t2)}
+.agenda-item .atxt b{color:var(--text)}
+.agenda-item .atime{
+  font-family:var(--mono);font-size:.7rem;color:var(--t3);
+  white-space:nowrap;
+}
+
+/* ── BIG QUOTE ── */
+.bq{
+  font-family:var(--serif);font-style:italic;
+  font-size:clamp(1.2rem,2.5vw,2rem);
+  line-height:1.5;color:var(--t2);
+  border-left:3px solid var(--red);padding-left:24px;
+  margin:16px 0;
+}
+.bq em{color:var(--text);font-style:normal}
+
+/* ── STEP LIST ── */
+.steps{display:flex;flex-direction:column;gap:0;width:100%;counter-reset:s}
+.step-item{
+  display:grid;grid-template-columns:52px 1fr;
+  gap:14px;padding:14px 0;border-top:1px solid var(--line);
+  align-items:start;counter-increment:s;
+}
+.step-item::before{
+  content:counter(s);
+  font-family:var(--serif);font-style:italic;
+  font-size:1.8rem;color:var(--teal);line-height:1;padding-top:2px;
+}
+.step-item:last-child{border-bottom:1px solid var(--line)}
+.step-item .stxt{font-size:.92rem;color:var(--t2);line-height:1.6}
+.step-item .stxt b{color:var(--text);font-weight:600}
+
+/* ── WARN ── */
+.warn{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 18px;background:rgba(224,160,58,.08);
+  border:1.5px solid rgba(224,160,58,.25);border-radius:10px;
+  font-size:.88rem;color:var(--t2);line-height:1.6;width:100%;margin:10px 0;
+}
+.warn .wi{flex-shrink:0;font-size:1.1rem;margin-top:1px}
+
+/* ── 4-CONCEPT MAP ── */
+.concept-map{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:12px;width:100%;
+}
+.concept-box{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:20px;position:relative;overflow:hidden;
+}
+.concept-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.concept-box.c1::before{background:var(--red)}
+.concept-box.c2::before{background:var(--teal)}
+.concept-box.c3::before{background:var(--gold)}
+.concept-box.c4::before{background:var(--blue)}
+.concept-box .cnum{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
+  font-weight:700;text-transform:uppercase;margin-bottom:8px;
+}
+.concept-box.c1 .cnum{color:var(--red)}
+.concept-box.c2 .cnum{color:var(--teal)}
+.concept-box.c3 .cnum{color:var(--gold)}
+.concept-box.c4 .cnum{color:var(--blue)}
+.concept-box h4{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.concept-box .cdesc{font-size:.84rem;color:var(--t2);line-height:1.6;margin-bottom:8px}
+.concept-box .canalog{
+  font-family:var(--serif);font-style:italic;font-size:.82rem;
+  color:var(--t3);
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .grid2,.grid3{grid-template-columns:1fr}
+  .concept-map{grid-template-columns:1fr}
+  .slide{padding:4vh 5vw}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="sec-label"></div>
+
+<!-- ═══════════════ SLIDES ═══════════════ -->
+<div id="deck">
+
+<!-- 0. TITLE -->
+<section class="slide title-slide active" data-section="">
+  <div class="content" style="display:flex;flex-direction:column;align-items:center">
+    <div class="eyebrow">Claude Seminar · 2026</div>
+    <div class="main-title">Claude로 만드는<br><em>나의 업무 시스템</em></div>
+    <div class="main-sub">Session 01 · 기초 다지기 · 3h</div>
+    <div class="meta-tags">
+      <span class="tag">🎬 엔터테인먼트 마케팅</span>
+      <span class="tag">👗 의류 브랜드</span>
+      <span class="tag">💻 IT 개발</span>
+    </div>
+  </div>
+</section>
+
+<!-- 1. AGENDA -->
+<section class="slide" data-section="오늘의 흐름">
+  <div class="content">
+    <div class="eyebrow">Today</div>
+    <div class="slide-title">3시간 안에 할 것들</div>
+    <div class="agenda" style="margin-top:28px">
+      <div class="agenda-item">
+        <div class="anum">1</div>
+        <div class="atxt"><b>LLM & Claude 이해</b> — 비유로 멘탈모델 잡기</div>
+        <div class="atime">40분</div>
+      </div>
+      <div class="agenda-item">
+        <div class="anum">2</div>
+        <div class="atxt"><b>Claude 데스크톱</b> — Chat · Cowork 구조와 차이</div>
+        <div class="atime">30분</div>
+      </div>
+      <div class="agenda-item">
+        <div class="anum">3</div>
+        <div class="atxt"><b>핵심 개념 4가지</b> — 지침 · 스킬 · 커넥터 · 플러그인</div>
+        <div class="atime">30분</div>
+      </div>
+      <div class="agenda-item">
+        <div class="anum">4</div>
+        <div class="atxt"><b>실습</b> — 폴더 세팅 + 도메인별 첫 작업</div>
+        <div class="atime">60분</div>
+      </div>
+      <div class="agenda-item">
+        <div class="anum">5</div>
+        <div class="atxt"><b>마무리</b> — 핵심 정리 + 다음 주 과제</div>
+        <div class="atime">20분</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 1 ── -->
+<section class="slide section-slide red" data-section="LLM & Claude 이해">
+  <div class="section-num">01</div>
+  <div class="section-title">LLM &amp; Claude 이해</div>
+  <div class="section-sub">왜 Claude이고, 어떻게 말을 걸어야 하는가</div>
+  <div class="section-time">⏱ 40분</div>
+</section>
+
+<!-- 3. LLM 비유 -->
+<section class="slide" data-section="LLM & Claude 이해">
+  <div class="content">
+    <div class="eyebrow">LLM이란?</div>
+    <div class="slide-title">도서관을 <em>통째로 읽은</em> 인턴</div>
+    <ul class="items" style="margin-top:24px">
+      <li>
+        <div class="bullet">📚</div>
+        <div><b>엄청나게 박식합니다</b> — 거의 모든 분야의 일반 지식을 가지고 있습니다</div>
+      </li>
+      <li>
+        <div class="bullet">👤</div>
+        <div><b>하지만 당신을 모릅니다</b> — 회사 사정, 브랜드 톤, 이번 주 상황은 알려줘야 압니다</div>
+      </li>
+      <li>
+        <div class="bullet" style="background:var(--gold);color:var(--bg)">⚠️</div>
+        <div><b>빈칸을 못 견딥니다</b> — 모르면 그럴듯하게 채워 넣습니다 → <b>Hallucination</b></div>
+      </li>
+      <li>
+        <div class="bullet teal">🎯</div>
+        <div><b>지시를 그대로 따릅니다</b> — 맥락이 풍부할수록 정확해집니다</div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 4. 다음 단어 맞히기 -->
+<section class="slide" data-section="LLM & Claude 이해">
+  <div class="content">
+    <div class="eyebrow">기술적으로는</div>
+    <div class="slide-title">"다음 <em>토큰</em>을 예측하는 시스템"</div>
+    <div class="bq" style="margin:24px 0">
+      "오늘 날씨가 너무<em> ___</em>" → 좋다 / 덥다 / 흐리다<br>
+      → 앞 문맥을 보고 확률이 가장 높은 다음 단어를 고른다
+    </div>
+    <div class="grid2" style="margin-top:8px">
+      <div class="card accent-top">
+        <div class="clabel">결론 1</div>
+        <h4>맥락이 모든 것을 결정</h4>
+        <p>어떤 문맥을 줬느냐에 따라 같은 질문도 완전히 다른 답이 나옵니다</p>
+      </div>
+      <div class="card accent-top gold">
+        <div class="clabel gold">결론 2 — 주의</div>
+        <h4>자신감 있게 틀릴 수 있다</h4>
+        <p>숫자 · 인용 · 고유명사는 반드시 원본과 대조하세요</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Claude 강점 vs 한계 -->
+<section class="slide" data-section="LLM & Claude 이해">
+  <div class="content">
+    <div class="eyebrow">Claude의 특징</div>
+    <div class="slide-title">강점 vs <em>한계</em></div>
+    <div class="grid2" style="margin-top:24px">
+      <div>
+        <div style="font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:12px">✅ 강점</div>
+        <ul class="items">
+          <li><div class="bullet teal">1</div><div><b>긴 문맥 처리</b> — 500K 토큰 ≈ A4 1,000페이지</div></li>
+          <li><div class="bullet teal">2</div><div><b>추론·글쓰기</b> — 뉘앙스·톤 조절 탁월</div></li>
+          <li><div class="bullet teal">3</div><div><b>안전성</b> — 민감 영역에서 신중</div></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:12px">❌ 한계</div>
+        <ul class="items">
+          <li><div class="bullet">⏰</div><div><b>실시간 정보 없음</b> — 웹 검색 기능 켜야</div></li>
+          <li><div class="bullet">🔢</div><div><b>계산은 약함</b> — 수식 결과 검증 필요</div></li>
+          <li><div class="bullet">👤</div><div><b>개인 맥락 모름</b> — Instructions로 알려줘야</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. 토큰·세션·컨텍스트 -->
+<section class="slide" data-section="LLM & Claude 이해">
+  <div class="content">
+    <div class="eyebrow">꼭 알아야 할 3가지</div>
+    <div class="slide-title">토큰 · 세션 · <em>컨텍스트</em></div>
+    <div class="grid3" style="margin-top:24px">
+      <div class="card accent-top">
+        <div class="clabel">Token</div>
+        <h4>토큰</h4>
+        <p>Claude의 처리 단위<br>한글 1글자 ≈ 1~1.5 토큰<br>영어 4글자 ≈ 1 토큰</p>
+      </div>
+      <div class="card accent-top teal">
+        <div class="clabel teal">Session</div>
+        <h4>세션</h4>
+        <p>채팅창 1개 = 독립된 메모리<br>새 창을 열면 이전 대화는 기억 못함<br>프로젝트는 공통 맥락 공유</p>
+      </div>
+      <div class="card accent-top gold">
+        <div class="clabel gold">Context Window</div>
+        <h4>컨텍스트 윈도우</h4>
+        <p>한 세션에서 볼 수 있는 최대량<br>Chat 유료 기준 <b>500K 토큰</b><br>≈ A4 1,000페이지</p>
+      </div>
+    </div>
+    <div class="warn" style="margin-top:16px">
+      <span class="wi">💡</span>
+      <span><b>실용 포인트:</b> 컨텍스트는 넘칠 일 거의 없습니다. 하나의 채팅창 = 하나의 작업 원칙이면 충분합니다.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 2 ── -->
+<section class="slide section-slide teal" data-section="Claude 데스크톱">
+  <div class="section-num">02</div>
+  <div class="section-title">Claude 데스크톱</div>
+  <div class="section-sub">3개의 탭, 다른 목적의 도구</div>
+  <div class="section-time">⏱ 30분</div>
+</section>
+
+<!-- 8. 3개의 탭 -->
+<section class="slide" data-section="Claude 데스크톱">
+  <div class="content">
+    <div class="eyebrow">Claude Desktop App</div>
+    <div class="slide-title">화면 상단 <em>3개의 탭</em></div>
+    <div class="grid3" style="margin-top:28px">
+      <div class="card accent-top teal">
+        <div class="clabel teal">Chat</div>
+        <h4>💬 대화·글쓰기·분석</h4>
+        <p style="margin-bottom:10px">클라우드 기반<br>어느 기기에서나 접속<br>Projects, Artifacts, Customize</p>
+        <p style="font-family:var(--mono);font-size:.72rem;color:var(--teal)">→ 일상 업무</p>
+      </div>
+      <div class="card accent-top gold">
+        <div class="clabel gold">Cowork</div>
+        <h4>🤖 파일 직접 처리·자동화</h4>
+        <p style="margin-bottom:10px">로컬 기반 (이 PC에서만)<br>실제 파일 읽기·쓰기·실행<br>Plugins, Scheduled Tasks</p>
+        <p style="font-family:var(--mono);font-size:.72rem;color:var(--gold)">→ 파일 자동화</p>
+      </div>
+      <div class="card accent-top blue">
+        <div class="clabel blue">Code</div>
+        <h4>⚙️ 코드베이스 직접 작업</h4>
+        <p style="margin-bottom:10px">로컬 기반<br>파일·빌드·git 자율 실행<br>개발자 전용</p>
+        <p style="font-family:var(--mono);font-size:.72rem;color:var(--blue)">→ 개발자만</p>
+      </div>
+    </div>
+    <div class="warn" style="margin-top:14px">
+      <span class="wi">⚠️</span>
+      <span><b>탭끼리는 다른 앱입니다.</b> Chat에서 한 대화가 Cowork로 넘어가지 않습니다.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 9. Chat 탭 -->
+<section class="slide" data-section="Claude 데스크톱">
+  <div class="content">
+    <div class="eyebrow">Chat 탭 사이드바</div>
+    <div class="slide-title">Chat 탭 — <em class="teal">클라우드 저장</em></div>
+    <div class="concept-map" style="margin-top:24px">
+      <div class="concept-box c2">
+        <div class="cnum">Projects</div>
+        <h4>내 전용 어시스턴트</h4>
+        <div class="cdesc">Instructions(지침) + Knowledge(파일) + 대화를 묶은 공간. 새 채팅을 열어도 설정이 유지됩니다.</div>
+        <div class="canalog">☁️ Anthropic 서버 저장 → 모든 기기 접근 가능</div>
+      </div>
+      <div class="concept-box c3">
+        <div class="cnum">Artifacts</div>
+        <h4>결과물 캔버스</h4>
+        <div class="cdesc">문서·코드·HTML·다이어그램을 채팅 오른쪽 별도 창에서 생성·편집합니다.</div>
+        <div class="canalog">갤러리에서 다른 사람 결과물도 가져와 수정 가능</div>
+      </div>
+      <div class="concept-box c1">
+        <div class="cnum">Customize</div>
+        <h4>스킬 · 커넥터 관리</h4>
+        <div class="cdesc">반복 업무 방법론(Skills)과 Gmail·Slack·Notion 연동(Connectors)을 설정합니다.</div>
+        <div class="canalog">한 번 설정 → 모든 채팅에 자동 적용</div>
+      </div>
+      <div class="concept-box c4">
+        <div class="cnum">Memory</div>
+        <h4>자동 기억</h4>
+        <div class="cdesc">과거 대화에서 중요 정보를 자동 요약해 다음 세션에 주입합니다.</div>
+        <div class="canalog">Settings → Memory에서 확인·수정 가능</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. Cowork 탭 -->
+<section class="slide" data-section="Claude 데스크톱">
+  <div class="content">
+    <div class="eyebrow">Cowork 탭 사이드바</div>
+    <div class="slide-title">Cowork 탭 — <em>로컬에서 실제로 일하기</em></div>
+    <ul class="items" style="margin-top:24px">
+      <li><div class="bullet teal">📋</div><div><b>Tasks</b> — 자연어로 지시 → Claude가 단계 계획 → 승인 후 실행. 실제 파일 읽기·쓰기·생성</div></li>
+      <li><div class="bullet teal">📁</div><div><b>Projects</b> — 특정 로컬 폴더를 연결. 작업 기억이 프로젝트 단위로 유지됨. <b>로컬 저장</b></div></li>
+      <li><div class="bullet gold">⚙️</div><div><b>Customize</b> — Plugins · Skills · Connectors 통합 관리</div></li>
+      <li><div class="bullet gold">⏰</div><div><b>Scheduled</b> — 매일·매주 반복 작업 예약. PC가 켜져 있어야 실행됨</div></li>
+    </ul>
+    <div class="callout teal" style="margin-top:16px">
+      <b>예시:</b> "이 폴더의 과거 보도자료 읽고, 같은 톤으로 신제품 보도자료 써서 PDF로 저장해줘" → 한 번의 지시로 실행
+    </div>
+  </div>
+</section>
+
+<!-- 11. 클라우드 vs 로컬 -->
+<section class="slide" data-section="Claude 데스크톱">
+  <div class="content">
+    <div class="eyebrow">핵심 구분</div>
+    <div class="slide-title">클라우드 <em>vs</em> 로컬</div>
+    <table class="ctable" style="margin-top:24px">
+      <tr>
+        <th>항목</th>
+        <th>Chat (클라우드)</th>
+        <th>Cowork (로컬)</th>
+      </tr>
+      <tr>
+        <td>Instructions·Projects</td>
+        <td class="yes">☁️ Anthropic 서버</td>
+        <td class="no">💻 내 PC만</td>
+      </tr>
+      <tr>
+        <td>여러 기기 접근</td>
+        <td class="yes">✅ 어디서나</td>
+        <td class="no">❌ 설치된 PC만</td>
+      </tr>
+      <tr>
+        <td>파일 직접 처리</td>
+        <td class="no">❌ 업로드 방식</td>
+        <td class="yes">✅ 폴더 직접 읽기·쓰기</td>
+      </tr>
+      <tr>
+        <td>자동화·스케줄</td>
+        <td class="no">❌</td>
+        <td class="yes">✅ Scheduled Tasks</td>
+      </tr>
+      <tr>
+        <td>주로 쓰는 상황</td>
+        <td class="hl">글쓰기·분석·Projects 세팅</td>
+        <td class="hl">파일 일괄 처리·자동 보고서</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- 12. 요금 체계 -->
+<section class="slide" data-section="Claude 데스크톱">
+  <div class="content">
+    <div class="eyebrow">Pricing</div>
+    <div class="slide-title">요금 체계 — <em>한 눈에</em></div>
+    <table class="ctable" style="margin-top:20px">
+      <tr>
+        <th>플랜</th>
+        <th>월 요금</th>
+        <th>5시간 사용량</th>
+        <th>Claude Code·Cowork</th>
+      </tr>
+      <tr>
+        <td>Free</td>
+        <td>$0</td>
+        <td>~9 메시지</td>
+        <td class="no">❌</td>
+      </tr>
+      <tr>
+        <td class="hl">Pro ★ 추천</td>
+        <td class="hl">$20</td>
+        <td class="hl">~45 메시지</td>
+        <td class="yes">✅</td>
+      </tr>
+      <tr>
+        <td>Max 5x</td>
+        <td>$100</td>
+        <td>~225 메시지</td>
+        <td class="yes">✅</td>
+      </tr>
+      <tr>
+        <td>Max 20x</td>
+        <td>$200</td>
+        <td>~450 메시지</td>
+        <td class="yes">✅</td>
+      </tr>
+    </table>
+    <div class="grid2" style="margin-top:12px">
+      <div class="callout">
+        <b>리셋 방식:</b> 5시간 롤링 윈도우.<br>자정 리셋이 아닙니다. 첫 메시지 전송 후 5시간마다 회복.
+      </div>
+      <div class="callout gold">
+        <b>메시지 수는 고정 아님.</b> 긴 문서 작업·Opus 모델 사용 시 토큰 소비가 커 더 빨리 소진됩니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 3 ── -->
+<section class="slide section-slide gold" data-section="핵심 개념 4가지">
+  <div class="section-num">03</div>
+  <div class="section-title">핵심 개념 4가지</div>
+  <div class="section-sub">지침 · 스킬 · 커넥터 · 플러그인</div>
+  <div class="section-time">⏱ 30분</div>
+</section>
+
+<!-- 14. 4가지 관계 -->
+<section class="slide" data-section="핵심 개념 4가지">
+  <div class="content">
+    <div class="eyebrow">개념 지도</div>
+    <div class="slide-title">4가지가 <em>어떻게 다른가</em></div>
+    <div class="concept-map" style="margin-top:20px">
+      <div class="concept-box c1">
+        <div class="cnum">Instructions (지침)</div>
+        <h4>항상 적용되는 규칙</h4>
+        <div class="cdesc">역할·톤·출력 형식·금지 사항. Project 또는 전역으로 설정.</div>
+        <div class="canalog">= 사원 수칙</div>
+      </div>
+      <div class="concept-box c2">
+        <div class="cnum">Skills (스킬)</div>
+        <h4>.md 파일로 작성하는 업무 매뉴얼</h4>
+        <div class="cdesc">특정 작업 방법론을 담은 재사용 파일. 키워드 매칭 시 자동 발동.</div>
+        <div class="canalog">= 업무 SOP 매뉴얼</div>
+      </div>
+      <div class="concept-box c3">
+        <div class="cnum">Connectors (커넥터)</div>
+        <h4>외부 서비스 연결</h4>
+        <div class="cdesc">Gmail · Slack · Notion · Google Drive 등을 Claude와 연동. 실시간 읽기·쓰기.</div>
+        <div class="canalog">= 사무 기기 연결</div>
+      </div>
+      <div class="concept-box c4">
+        <div class="cnum">Plugins (플러그인)</div>
+        <h4>직무별 완성 패키지</h4>
+        <div class="cdesc">Skills + Connectors + 슬래시 명령어를 직무에 맞게 묶어 설치 즉시 사용.</div>
+        <div class="canalog">= 직무 입문 패키지</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15. MD 파일 -->
+<section class="slide" data-section="핵심 개념 4가지">
+  <div class="content">
+    <div class="eyebrow">.md 파일 = Markdown</div>
+    <div class="slide-title">스킬은 <em>이렇게 씁니다</em></div>
+    <div class="grid2" style="margin-top:18px;align-items:start">
+      <div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">기본 마크다운 문법</div>
+        <pre><span class="hl"># 제목</span>  <span class="cm">← 큰 제목</span>
+<span class="hl">## 소제목</span>
+<span class="st">**굵게**</span>, *기울임*, <span class="kw">`코드`</span>
+- 목록 항목
+1. 번호 목록</pre>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">스킬 파일 구조</div>
+        <pre><span class="cm">---</span>
+<span class="kw">name</span>: 보도자료-작성
+<span class="kw">description</span>: 보도자료, 보도 요청
+  키워드 감지 시 자동 활성화
+<span class="cm">---</span>
+
+<span class="hl">## 역할</span>
+엔터테인먼트 마케팅 시니어
+
+<span class="hl">## 출력 구조</span>
+제목 → 요약 → 본문 → 배포 정보
+
+<span class="hl">## 규칙</span>
+- 추측은 [확인 필요] 표시
+- 400자 이내</pre>
+      </div>
+    </div>
+    <div class="warn" style="margin-top:8px">
+      <span class="wi">💡</span>
+      <span><b>description이 핵심.</b> 여기 쓴 키워드를 대화에서 쓰면 스킬이 자동 발동합니다.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 16. 좋은 지침 원칙 -->
+<section class="slide" data-section="핵심 개념 4가지">
+  <div class="content">
+    <div class="eyebrow">Instructions 작성법</div>
+    <div class="slide-title">좋은 지침 vs <em>나쁜 지침</em></div>
+    <div class="grid2" style="margin-top:20px;align-items:start;gap:20px">
+      <div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">❌ 이렇게 쓰면 효과 없음</div>
+        <ul class="items">
+          <li><div class="bullet">1</div><div>"잘 써줘" "자연스럽게" "퀄리티 있게" → 측정 불가</div></li>
+          <li><div class="bullet">2</div><div>"너무 길게 쓰지 마" → 부정문</div></li>
+          <li><div class="bullet">3</div><div>한 번만 쓸 상황별 지시까지 다 넣기</div></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">✅ 이렇게 쓰면 효과적</div>
+        <ul class="items">
+          <li><div class="bullet teal">1</div><div>"핵심만 3문장으로" "문장당 20자 이내" → 구체적</div></li>
+          <li><div class="bullet teal">2</div><div>부정문 → 긍정문으로 바꾸기</div></li>
+          <li><div class="bullet teal">3</div><div>모든 채팅에 반복하는 것만, 500자 이내</div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout teal" style="margin-top:16px">
+      <b>월 1회 점검 프롬프트:</b> "이 Instructions를 검토해줘. 효과 없는 항목 / 모순 / 추가할 것을 각각 알려줘."
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 4 ── -->
+<section class="slide section-slide blue" data-section="실습">
+  <div class="section-num">04</div>
+  <div class="section-title">실습</div>
+  <div class="section-sub">폴더 준비 → 플러그인 설치 → 각자 첫 작업</div>
+  <div class="section-time">⏱ 60분</div>
+</section>
+
+<!-- 18. 실습 준비 -->
+<section class="slide" data-section="실습">
+  <div class="content">
+    <div class="eyebrow">실습 준비</div>
+    <div class="slide-title">시작 전 <em>5단계</em></div>
+    <div class="steps" style="margin-top:24px">
+      <div class="step-item">
+        <div class="stxt"><b>전용 작업 폴더 만들기</b> — Documents 전체가 아닌 별도 폴더. 보안 경계입니다</div>
+      </div>
+      <div class="step-item">
+        <div class="stxt"><b>Claude Desktop → Cowork 탭</b> 으로 전환</div>
+      </div>
+      <div class="step-item">
+        <div class="stxt"><b>Customize → Plugins → Browse</b> → Marketing 플러그인 설치</div>
+      </div>
+      <div class="step-item">
+        <div class="stxt"><b>Projects → 새 프로젝트</b> → 전용 폴더 연결</div>
+      </div>
+      <div class="step-item">
+        <div class="stxt"><b>다음 슬라이드의 지시문</b> 복붙 → Run 실행</div>
+      </div>
+    </div>
+    <div class="warn" style="margin-top:12px">
+      <span class="wi">⚠️</span>
+      <span>처음엔 Claude가 권한을 물어봅니다. 파일 접근 승인 후 진행하세요.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 19. 마케터 실습 -->
+<section class="slide" data-section="실습">
+  <div class="content">
+    <div class="eyebrow" style="color:var(--red)">🎬 엔터테인먼트 마케터</div>
+    <div class="slide-title">복붙 실습 지시문</div>
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;width:100%">
+      <div class="prompt-card mkt">
+        <div class="plabel">① 캠페인 브리프</div>
+        <div class="ptext">너는 엔터테인먼트 마케팅 시니어야. 아래 신작의 런칭 캠페인 브리프를 만들어줘.
+출력: ① 타깃 페르소나 2개 ② 핵심 메시지 1줄 ③ 채널별(인스타·유튜브·틱톡) 전략 ④ KPI 3개
+작품 정보: <span class="ph">[붙여넣기]</span></div>
+      </div>
+      <div class="prompt-card mkt">
+        <div class="plabel">② 보도자료 (폴더 활용)</div>
+        <div class="ptext">이 폴더의 과거 보도자료들을 먼저 읽고 톤·형식을 파악한 다음, 같은 스타일로 <span class="ph">[신작]</span> 보도자료 초안을 써줘. 사실관계 불확실한 부분은 [확인 필요] 표시.</div>
+      </div>
+      <div class="prompt-card mkt">
+        <div class="plabel">③ SNS 카피 변주</div>
+        <div class="ptext">다음 메시지를 인스타(감성·150자), 유튜브 커뮤니티(정보형·300자), 틱톡(첫 줄 후킹·80자) 세 버전으로. 해시태그 별도 줄. 메시지: <span class="ph">[붙여넣기]</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 20. 브랜드 실습 -->
+<section class="slide" data-section="실습">
+  <div class="content">
+    <div class="eyebrow" style="color:#a07ae0">👗 의류 브랜드 총괄</div>
+    <div class="slide-title">복붙 실습 지시문</div>
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;width:100%">
+      <div class="prompt-card brand">
+        <div class="plabel">① 시즌 콘셉트 정리</div>
+        <div class="ptext">이 폴더의 무드보드·브랜드북을 모두 읽고, 이번 시즌 콘셉트를 한 장으로 정리해줘.
+출력: ① 키워드 3개 ② 컬러 팔레트 설명 ③ 무드 2문장 ④ 카테고리별 방향. PDF로.</div>
+      </div>
+      <div class="prompt-card brand">
+        <div class="plabel">② 상품 디스크립션 일괄</div>
+        <div class="ptext">products 폴더의 상품 정보를 읽고 상품마다 한국어·영어 디스크립션을 작성해줘.
+톤: 차분·시적, 형용사 남발 금지, 짧은 문장. 결과를 상품별 표로.</div>
+      </div>
+      <div class="prompt-card brand">
+        <div class="plabel">③ 바이어 영문 메일</div>
+        <div class="ptext">해외 바이어용 신규 컬렉션 소개 영문 메일. 구조: 제목(8단어 이내)/인사 1줄/핵심 3불릿/룩북 첨부 안내/클로징. 컬렉션 정보: <span class="ph">[붙여넣기]</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 21. 개발자 실습 -->
+<section class="slide" data-section="실습">
+  <div class="content">
+    <div class="eyebrow" style="color:var(--blue)">💻 IT 개발자</div>
+    <div class="slide-title">복붙 실습 지시문</div>
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;width:100%">
+      <div class="prompt-card dev">
+        <div class="plabel">① 데이터 쿼리</div>
+        <div class="ptext">/data:write-query — 다음 요구사항으로 SQL 작성: <span class="ph">[예: 최근 30일 일별 활성·신규 사용자]</span>
+스키마: <span class="ph">[붙여넣기]</span>. 작성 후 의도와 잠재 성능 이슈 짧게.</div>
+      </div>
+      <div class="prompt-card dev">
+        <div class="plabel">② 코드 리뷰 (저장소 폴더)</div>
+        <div class="ptext">이 저장소의 <span class="ph">[파일명]</span>을 읽고 리뷰해줘.
+팀 컨벤션: [snake_case, 함수 30줄 이내, 명시적 에러 처리]
+출력: ① 심각도별 이슈 ② 수정 제안 ③ 잘된 부분 1~2개</div>
+      </div>
+      <div class="prompt-card dev">
+        <div class="plabel">③ 온보딩 문서 초안</div>
+        <div class="ptext">이 폴더의 README·코드를 읽고 신규 입사자용 온보딩 문서 초안 작성.
+섹션: 아키텍처 개요 / 로컬 셋업 / 디렉토리 설명 / 자주 막히는 지점.
+추측한 부분은 [확인 필요] 표시.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 5 ── -->
+<section class="slide section-slide green" data-section="마무리">
+  <div class="section-num">05</div>
+  <div class="section-title">마무리</div>
+  <div class="section-sub">오늘의 핵심 + 다음 주 예고</div>
+  <div class="section-time">⏱ 20분</div>
+</section>
+
+<!-- 23. 핵심 정리 -->
+<section class="slide" data-section="마무리">
+  <div class="content">
+    <div class="eyebrow">Today's Key Takeaways</div>
+    <div class="slide-title">오늘 가져갈 <em>3가지</em></div>
+    <ul class="items" style="margin-top:28px">
+      <li>
+        <div class="bullet" style="font-size:1rem">01</div>
+        <div>
+          <b>Claude = 도서관을 읽은 인턴</b><br>
+          <span style="color:var(--t3)">맥락·역할·예시·형식을 주면 갑자기 시니어가 된다</span>
+        </div>
+      </li>
+      <li>
+        <div class="bullet teal" style="font-size:1rem">02</div>
+        <div>
+          <b>Chat(클라우드) ≠ Cowork(로컬)</b><br>
+          <span style="color:var(--t3)">목적이 다른 도구. 글쓰기·분석은 Chat, 파일 자동화는 Cowork</span>
+        </div>
+      </li>
+      <li>
+        <div class="bullet gold" style="font-size:1rem">03</div>
+        <div>
+          <b>지침·스킬·플러그인 — 한 번 세팅하면 매번 쓴다</b><br>
+          <span style="color:var(--t3)">반복하는 것을 지침에 적고, 플러그인을 설치하면 설명이 필요 없어진다</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 24. 과제 + 예고 -->
+<section class="slide" data-section="마무리">
+  <div class="content">
+    <div class="eyebrow">Next Week</div>
+    <div class="slide-title">다음 주 <em>과제</em> + 예고</div>
+    <div class="grid2" style="margin-top:24px;align-items:start">
+      <div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">📋 이번 주 과제</div>
+        <div class="callout" style="margin-bottom:10px">
+          Claude를 <b>매일 최소 1번</b> 이상 실제 업무에 사용해보세요
+        </div>
+        <ul class="items">
+          <li><div class="bullet">✅</div><div><b>잘 된 케이스 1개</b> — 다음 시간에 공유</div></li>
+          <li><div class="bullet gold">⚠️</div><div><b>망한 케이스 1개</b> — 같이 고쳐봅니다</div></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">🔮 2회차 예고</div>
+        <ul class="items">
+          <li><div class="bullet teal">1</div><div>사례 공유 & 프롬프트 디버깅</div></li>
+          <li><div class="bullet teal">2</div><div>Scheduled Tasks — 매일 자동 보고서</div></li>
+          <li><div class="bullet teal">3</div><div>멀티턴 대화 설계 심화</div></li>
+          <li><div class="bullet teal">4</div><div>각자 첫 번째 Project 지침 완성</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- #deck -->
+
+<!-- NAVIGATION -->
+<div id="nav">
+  <button id="btn-prev" onclick="go(-1)" disabled>←</button>
+  <div id="counter">1 / 24</div>
+  <button id="btn-next" onclick="go(1)">→</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+function update(){
+  slides.forEach((s,i)=>{
+    s.classList.remove('active','exit');
+    if(i===cur) s.classList.add('active');
+    else if(i<cur) s.classList.add('exit');
+  });
+  document.getElementById('progress').style.width = ((cur/(total-1))*100)+'%';
+  document.getElementById('counter').textContent = (cur+1)+' / '+total;
+  document.getElementById('btn-prev').disabled = cur===0;
+  document.getElementById('btn-next').disabled = cur===total-1;
+  document.getElementById('sec-label').textContent = slides[cur].dataset.section||'';
+}
+
+function go(d){
+  const n = cur+d;
+  if(n>=0 && n<total){ cur=n; update(); }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+
+let tx=0;
+document.addEventListener('touchstart',e=>{ tx=e.touches[0].clientX; },{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50) go(dx<0?1:-1);
+},{passive:true});
+
+update();
+</script>
+</body>
+</html>
